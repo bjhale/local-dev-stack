@@ -1,6 +1,12 @@
 # Simple, Flexible, Dockerized Local Development Environment
 
-This is a docker local development stack that I have been using for a couple of years now. Its a group of dockerized services that allow web developers to spin up multiple projects in parallel with ease. 
+This is a docker local development stack that I have been using for a couple of years now. Its a group of dockerized services that allow web developers to spin up multiple projects in parallel with ease.
+
+The environment consists of 3 elements:
+
+* Traefik for a local proxy.
+* Portainer for container management.
+* Docker-gen for easy (less verbose) traefik configuration compatible with MOST use cases.
 
 ## Setup
 
