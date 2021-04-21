@@ -1,0 +1,30 @@
+http:
+  routers:
+  {{ range $enabled, $containers := groupByLabel $ "easy.enable" }}
+  {{ range $key, $container := $containers }}
+    Router{{ $key }}_http:
+      entryPoints:
+        - http
+      service: Service{{ $key }}
+      rule: Host(`{{ index $container.Labels "easy.hostname" }}`)
+    Router{{ $key }}_https:
+      entryPoints:
+        - https
+      service: Service{{ $key }}
+      rule: Host(`{{ index $container.Labels "easy.hostname" }}`)
+      tls: {}
+  {{ end }}
+  {{ end }}
+  services:
+  {{ range $enabled, $containers := groupByLabel $ "easy.enable" }}
+  {{ range $key, $container := $containers }}
+  {{ range $network := $container.Networks }}
+  {{ if eq $network.Name "local-proxy" }}
+    Service{{ $key }}:
+      loadBalancer:
+        servers:
+          - url: http://{{ $network.IP }}:{{ if index $container.Labels "easy.port" }}{{ index $container.Labels "easy.port" }}{{ else }}80{{end}}
+  {{ end }}
+  {{ end }}
+  {{ end }}
+  {{ end }}

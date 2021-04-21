@@ -1,0 +1,25 @@
+## traefik.yml
+
+# Docker Configuration Backend
+providers:
+  docker:
+    exposedByDefault: false
+    endpoint: "tcp://host.docker.internal:2375"
+    defaultRule: "Host(`{{ if index .Labels \"traefik.hostname\" }}{{ index .Labels \"traefik.hostname\" }}{{ else }}{{ normalize .Name }}.localtest.me{{ end }}`)"
+  file:
+    directory: /etc/traefik/traefik.file.d
+    watch: true
+
+entryPoints:
+  http:
+    address: ":80"
+  https:
+    address: ":443"
+
+# Enable Access Log
+accessLog: {}
+
+# Enable API
+api:
+  insecure: true
+  dashboard: true

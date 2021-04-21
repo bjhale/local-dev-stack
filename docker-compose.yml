@@ -1,0 +1,75 @@
+version: "3.5"
+services:
+    portainer:
+        image: portainer/portainer-ce
+        command: -H ${DOCKER_DAEMON}
+        privileged: true
+        network_mode: bridge
+        ports: 
+            - "9000:9000"
+        volumes: 
+            - portainer_data:/portainer_data
+        restart: unless-stopped
+
+    traefik:
+        image: traefik:v2.0
+        ports:
+            - "80:80"
+            - "443:443"
+            - "8080:8080"
+        networks:
+            - local-proxy
+        volumes:
+            - ./certs:/certs:ro
+            - /var/run/docker.sock:/var/run/docker.sock
+            - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+            - traefik_config:/etc/traefik/traefik.file.d
+        restart: unless-stopped
+
+    docker-gen:
+        image: jwilder/docker-gen
+        command: -config /docker-gen.cfg
+        privileged: true
+        networks:
+            - local-proxy
+        volumes:
+            - /var/run/docker.sock:/tmp/docker.sock
+            - ./docker-gen/docker-gen.cfg:/docker-gen.cfg:ro
+            - ./docker-gen/easy.yml.tmpl:/easy.yml.tmpl:ro
+            - traefik_config:/traefik.file.d:delegated
+    whoami:
+        image: containous/whoami
+        networks:
+            - local-proxy
+        expose:
+            - 80
+        restart: unless-stopped
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.whoami_http.rule=Host(`whoami.localtest.me`)"
+            - "traefik.http.routers.whoami_http.entrypoints=http"
+            - "traefik.http.routers.whoami_https.rule=Host(`whoami.localtest.me`)"
+            - "traefik.http.routers.whoami_https.entrypoints=https"
+            - "traefik.http.routers.whoami_https.tls=true"
+
+    whoami-easy:
+        image: containous/whoami
+        networks:
+            - local-proxy
+        expose:
+            - 80
+        restart: unless-stopped
+        labels:
+            easy.enable: true
+            easy.hostname: whoami-easy.localtest.me
+            easy.port: 80
+
+volumes:
+    portainer_data: {}
+    traefik_config: {}
+
+networks:
+    local-proxy:
+        external:
+            name: local-proxy
+
