@@ -66,4 +66,4 @@ Access portainer via http://localhost:9000
 
 Access Traefik Dashboard via http://localhost:8080/dashboard/
 
-See the whoami and whoami-easy services within docker-compose for examples of how to configure your applications to utilize traefik.
+See the whoami and whoami-easy services within docker-compose.yml for examples of how to configure your applications to utilize traefik.
